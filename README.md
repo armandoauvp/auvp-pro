@@ -1,65 +1,72 @@
 # AUVP Pro
 
-Site estático da AUVP Pro, migrado do WordPress/Elementor. O repositório é o ponto de
-deploy: um push em `main` publica no GitHub Pages.
+Site estático da AUVP Pro, migrado do WordPress/Elementor. Construído com **Vite**
+e publicado na **Vercel**.
 
 ## Como rodar
 
 ```bash
 npm install
-npm run dev     # build + servidor em http://localhost:4000 + watch
-npm run build   # gera dist/
+npm run dev       # servidor de desenvolvimento com HMR em http://localhost:5173
+npm run build     # gera dist/
+npm run preview   # serve dist/ como em produção
 ```
 
 ## Estrutura
 
 ```
+index.html            página inicial — cada página é uma entrada do Vite
+hp12c/index.html      /hp12c/
+termos/index.html     /termos/
+obrigado/index.html   /obrigado/
 src/
   css/main.css        Tailwind (entrada) + estilos dos componentes
-  js/site.js          comportamentos de todas as páginas (cada init é no-op se o bloco não existe)
+  js/site.js          entrada JS de todas as páginas; importa o CSS
   partials/           head, header, footer, logos e o FAQ compartilhado
-  pages/              uma pasta por URL — index, hp12c/, termos/, obrigado/
-static/               arquivos copiados como estão (logos, favicon, robots.txt)
+public/               servido como está, na raiz (logos, favicon, robots.txt)
 brand/                pacote de marca (origem); não vai para o ar — ver brand/README.md
-build.mjs             monta as páginas, compila o Tailwind e copia os assets para dist/
+vite.config.js        entradas das páginas + plugin de parciais
+vercel.json           configuração de deploy
 ```
 
-### Páginas
+### Parciais de HTML
 
-| URL         | Arquivo                       |
-| ----------- | ----------------------------- |
-| `/`         | `src/pages/index.html`        |
-| `/hp12c/`   | `src/pages/hp12c/index.html`  |
-| `/termos/`  | `src/pages/termos/index.html` |
-| `/obrigado/`| `src/pages/obrigado/index.html` |
+O plugin `htmlPartials` em `vite.config.js` resolve `{{> nome }}` para o conteúdo de
+`src/partials/nome.html`. Inclusões aninhadas funcionam, e editar um parcial recarrega
+a página aberta no `npm run dev`.
 
-### Template
+Ele roda em `order: 'pre'`, antes do processamento de HTML do Vite — por isso as tags
+que vêm de dentro de um parcial (o `<script>` de entrada, o `<link>` do favicon, as
+imagens dos logos) passam normalmente pelo pipeline de assets.
 
-O `build.mjs` resolve três tokens nos arquivos de `src/pages` e `src/partials`:
+### Caminhos
 
-- `{{> nome }}` — inclui `src/partials/nome.html` (pode aninhar)
-- `{{base}}` — prefixo relativo até a raiz (`` na home, `../` nas subpastas).
-  É o que faz o site funcionar tanto em `usuario.github.io/auvp-pro/` quanto na raiz
-  de um domínio próprio, sem alterar nada.
+O site é servido na raiz do domínio, então as referências são absolutas (`/hp12c/`,
+`/assets/img/logo-auvp-pro.svg`). CSS e JS são injetados pelo Vite com hash no nome,
+não precisam ser referenciados à mão.
+
+### Swiper
+
+Só a página da HP-12C tem carrossel, então o Swiper entra por `import()` dinâmico
+dentro de `initLessonCarousel`. Ele vira um chunk separado (~151 kB) que as outras
+páginas nunca baixam.
 
 ## Deploy
 
-`.github/workflows/deploy.yml` roda `npm ci && npm run build` e publica `dist/` no
-GitHub Pages a cada push em `main`.
+A Vercel builda e publica a cada push. `vercel.json` fixa o build (`npm run build`),
+a saída (`dist`) e um `Cache-Control` imutável para `/assets/*`, que já têm hash no nome.
 
-Para ativar: **Settings → Pages → Source: GitHub Actions**.
+`.github/workflows/ci.yml` roda `npm ci && npm run build` em cada pull request e em
+push na `main` — só verifica que o build passa; quem publica é a Vercel.
 
-### Migrar para o domínio próprio
+### Domínio próprio
 
-1. Criar `static/CNAME` com o domínio (ex.: `pro.auvp.com.br`) — o build copia para `dist/`.
-2. Apontar o DNS para o GitHub Pages.
-3. **Settings → Pages → Custom domain** e marcar *Enforce HTTPS*.
-
-Nenhum caminho precisa mudar: tudo já é relativo.
+Configurar em **Project → Settings → Domains** na Vercel e apontar o DNS. Nada muda no
+código: os caminhos já são absolutos a partir da raiz.
 
 ## Pontos que dependem de material externo
 
 - **Logo da AUVP Capital**: o rodapé dos prints usa a marca da Capital, que não veio no
   pacote de logos. Está com o logo da AUVP Pro em branco no lugar — ver `brand/README.md`.
 - **Imagem de fundo do hero**: definida em `--hero-image` no topo de `src/css/main.css`.
-- **Links de checkout**: os botões de preço estão com `href="#"` em `src/pages/index.html`.
+- **Links de checkout**: os botões de preço estão com `href="#"` em `index.html`.
