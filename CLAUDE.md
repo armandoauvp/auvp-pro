@@ -25,6 +25,7 @@ index.html            /
 hp12c/index.html      /hp12c/
 termos/index.html     /termos/
 obrigado/index.html   /obrigado/
+paginas/index.html    /paginas/  (índice das páginas; noindex — atualize ao criar página)
 src/
   css/main.css        Tailwind (entrada) + estilos dos componentes
   js/site.js          entrada JS de todas as páginas; importa o CSS
@@ -61,9 +62,17 @@ de ~151 kB que só a página da HP-12C baixa. Não importe Swiper no topo do arq
 
 ### Estilos
 
-Tailwind 3 via PostCSS. `src/css/main.css` tem as diretivas do Tailwind e, abaixo, os
-estilos dos componentes portados do Elementor. Ao criar uma página nova, **adicione-a ao
-`content` do `tailwind.config.js`**, senão as classes dela são removidas do CSS final.
+Tailwind 4 pelo plugin `@tailwindcss/vite` (sem PostCSS e sem `tailwind.config.js`).
+`src/css/main.css` começa com `@import "tailwindcss"` e um bloco `@theme` com os tokens da
+marca; abaixo vêm os estilos dos componentes portados do Elementor. As páginas são
+detectadas sozinhas, não há lista de `content` para manter.
+
+A migração da v3 preservou a aparência de propósito. Por isso existem:
+- um bloco de compatibilidade no `@layer base` (cor padrão de borda e `cursor: pointer`
+  em botões, como na v3);
+- `--color-green-600` fixado no valor da v3, a única cor da paleta que mudou visivelmente;
+- tamanhos responsivos com line-height explícito (`md:text-4xl/10`): na v4 um `leading-*`
+  do elemento continua valendo no breakpoint, na v3 o tamanho o sobrescrevia.
 
 Fonte **Anek Latin** em todo o site. Verde da marca: `#166534` (`brand-green`), escuro
 `#0b4021`. Cinza do texto: `#4B4B4B` (`brand-ink`). Fundo de seção: `#F6F6F6`.

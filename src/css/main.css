@@ -1,11 +1,40 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Tokens da marca (antes no tailwind.config.js). */
+@theme {
+  --font-anek: "Anek Latin", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-green-light: #22c55e;
+  --color-brand-green: #166534;
+  --color-brand-green-dark: #0b4021;
+  --color-brand-ink: #4b4b4b;
+  --color-brand-surface: #f6f6f6;
+  --color-highlight: #18181b;
+
+  /* Unica cor da paleta que mudou visivelmente da v3 para a v4; mantida como era. */
+  --color-green-600: #16a34a;
+
+  --breakpoint-xs: 400px;
+}
 
 /* =========================================================
    BASE
    ========================================================= */
 @layer base {
+  /* Compatibilidade com o Tailwind 3: a v4 mudou estes padroes do preflight. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   :root {
     /* Arte de fundo do hero — trocar aqui para atualizar todas as paginas. */
     --hero-image: url('https://cdn.asupernova.com.br/auvp%20pro/1.png');
@@ -24,7 +53,7 @@
 
   /* Um anel de foco visivel e consistente em toda a navegacao por teclado. */
   :focus-visible {
-    outline: 2px solid theme('colors.brand-green');
+    outline: 2px solid var(--color-brand-green);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -359,11 +388,11 @@
 
 #auvp-modules-section .card-number {
   background: rgba(22, 101, 52, 0.1);
-  @apply mb-3 w-fit rounded px-2 py-1 text-xs font-black uppercase text-brand-green;
+  @apply mb-3 w-fit rounded-sm px-2 py-1 text-xs font-black uppercase text-brand-green;
 }
 
 #auvp-modules-section .card-title {
-  @apply mb-4 min-h-[3rem] text-xl font-bold text-zinc-900;
+  @apply mb-4 min-h-12 text-xl font-bold text-zinc-900;
 }
 
 #auvp-modules-section .card-desc {
@@ -645,6 +674,12 @@
   @apply shrink-0 text-[15px] font-bold text-brand-green;
 }
 
+/* Na jornada salarial o pai e text-sm. O Tailwind 3 passava a altura de linha dele em
+   rem; a v4 passa uma proporcao, que cresce com os 15px do icone. */
+.salary-item .check-green {
+  line-height: 1.25rem;
+}
+
 /* =========================================================
    JORNADA SALARIAL
    ========================================================= */
@@ -770,7 +805,7 @@
    DEPOIMENTOS
    ========================================================= */
 .testimonial-card {
-  @apply relative h-full overflow-hidden rounded-xl bg-[#f6f6f6] p-8 shadow-sm transition-shadow hover:shadow-md;
+  @apply relative h-full overflow-hidden rounded-xl bg-[#f6f6f6] p-8 shadow-xs transition-shadow hover:shadow-md;
   opacity: 0;
   animation: slide-up-fade 0.6s ease-out forwards;
 }
@@ -948,7 +983,7 @@
 }
 
 .lesson-card {
-  @apply flex h-full w-full flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm;
+  @apply flex h-full w-full flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-xs;
 }
 
 .custom-prev,

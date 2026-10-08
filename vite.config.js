@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 const root = import.meta.dirname
 const partialsDir = path.join(root, 'src/partials')
@@ -79,7 +80,7 @@ function pages() {
 
 export default defineConfig({
   appType: 'mpa',
-  plugins: [htmlPartials()],
+  plugins: [htmlPartials(), tailwindcss()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
