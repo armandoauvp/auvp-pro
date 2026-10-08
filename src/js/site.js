@@ -2,8 +2,9 @@
  * Comportamentos do site AUVP Pro.
  *
  * Cada init() e um no-op quando o componente nao existe na pagina, entao este
- * unico arquivo serve todas as paginas.
+ * unico arquivo e a entrada de todas elas.
  */
+import '../css/main.css'
 
 /* ---------------------------------------------------------------
    Cabecalho: menu mobile e dropdowns do desktop
@@ -335,11 +336,18 @@ function initHp12c() {
 /* ---------------------------------------------------------------
    Carrossel de aulas (Swiper) — apenas na pagina da HP-12C
    --------------------------------------------------------------- */
-function initLessonCarousel() {
+async function initLessonCarousel() {
   const el = document.querySelector('.lesson-swiper')
-  if (!el || typeof window.Swiper === 'undefined') return
+  if (!el) return
 
-  new window.Swiper(el, {
+  // So a pagina da HP-12C tem carrossel: o Swiper vem em um chunk a parte,
+  // carregado sob demanda, e fica fora do bundle das outras paginas.
+  const [{ default: Swiper }] = await Promise.all([
+    import('swiper/bundle'),
+    import('swiper/css/bundle'),
+  ])
+
+  new Swiper(el, {
     slidesPerView: 1,
     spaceBetween: 20,
     loop: true,
