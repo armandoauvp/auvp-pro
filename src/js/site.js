@@ -367,7 +367,46 @@ async function initLessonCarousel() {
   })
 }
 
+/* ---------------------------------------------------------------
+   UTMs: guardadas durante a visita e repassadas aos links internos,
+   sem sobrescrever o que o link ja tem. Outros produtos ficam de fora.
+   --------------------------------------------------------------- */
+function initUtms() {
+  const fromUrl = {}
+  new URLSearchParams(location.search).forEach((value, name) => {
+    if (name.startsWith('utm_') && value) fromUrl[name] = value
+  })
+  let utms = fromUrl
+  try {
+    // UTMs novas na URL substituem as guardadas.
+    if (Object.keys(fromUrl).length) sessionStorage.setItem('auvp_utms', JSON.stringify(fromUrl))
+    else utms = JSON.parse(sessionStorage.getItem('auvp_utms')) || {}
+  } catch {}
+
+  const names = Object.keys(utms)
+  if (!names.length) return
+  const hosts = [location.hostname, 'auvp.pro', 'www.auvp.pro']
+
+  for (const a of document.querySelectorAll('a[href]')) {
+    const href = a.getAttribute('href')
+    if (!href || href.startsWith('#')) continue
+    let url
+    try {
+      url = new URL(href, location.href)
+    } catch {
+      continue
+    }
+    if (!/^https?:$/.test(url.protocol) || !hosts.includes(url.hostname)) continue
+    if (/\.(pdf|png|jpe?g|webp|svg|zip)$/i.test(url.pathname)) continue
+    const missing = names.filter((name) => !url.searchParams.has(name))
+    if (!missing.length) continue
+    missing.forEach((name) => url.searchParams.set(name, utms[name]))
+    a.setAttribute('href', url.toString())
+  }
+}
+
 function init() {
+  initUtms()
   initHeader()
   initCertTabs()
   initReveal()
